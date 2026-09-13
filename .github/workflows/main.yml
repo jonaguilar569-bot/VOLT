@@ -1,10 +1,10 @@
 name: Compilar APK de VOLT
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,13 +24,18 @@ jobs:
       - name: Configurar Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Instalar Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Instalar componentes de Android
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Configurar Gradle
+        uses: gradle/gradle-build-action@v3
         with:
           gradle-version: '8.10'
 
       - name: Compilar APK de prueba
-        run: gradle :app:assembleDebug --stacktrace
+        run: gradle :app:assembleDebug
 
       - name: Guardar APK compilada
         uses: actions/upload-artifact@v4
