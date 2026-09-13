@@ -4,14 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - principal
       - main
 
-permissions:
-  contents: read
-
 jobs:
-  build-apk:
+  build:
     name: Generar APK
     runs-on: ubuntu-latest
 
@@ -28,23 +24,16 @@ jobs:
       - name: Configurar Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Instalar componentes de Android
-        run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
-
-      - name: Configurar Gradle
+      - name: Instalar Gradle
         uses: gradle/actions/setup-gradle@v4
-
-      - name: Dar permisos al Gradle Wrapper
-        run: chmod +x ./gradlew
+        with:
+          gradle-version: '8.10'
 
       - name: Compilar APK de prueba
-        run: ./gradlew :app:assembleDebug --stacktrace
+        run: gradle :app:assembleDebug --stacktrace
 
       - name: Guardar APK compilada
         uses: actions/upload-artifact@v4
         with:
           name: VOLT-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
